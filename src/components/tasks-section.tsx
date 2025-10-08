@@ -53,7 +53,7 @@ export default function TasksSection() {
   const categories = Object.keys(tasksByCategory).sort();
 
   return (
-    <div className="flex flex-col h-full max-w-4xl mx-auto animate-fade-in">
+    <div className="flex flex-col h-full max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">My Tasks</h2>
 
       <form onSubmit={handleAddTask} className="flex flex-col sm:flex-row gap-2 mb-8">

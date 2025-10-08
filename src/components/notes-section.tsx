@@ -55,7 +55,7 @@ export default function NotesSection() {
   }
 
   return (
-    <div className="flex flex-col h-full animate-fade-in">
+    <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">My Notes</h2>
         <Button onClick={() => openDialog(null)} className="bg-primary hover:bg-primary/90 text-primary-foreground">

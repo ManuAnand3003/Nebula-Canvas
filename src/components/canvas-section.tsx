@@ -141,7 +141,7 @@ export default function CanvasSection() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full animate-fade-in">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
       <div className="lg:col-span-2 flex flex-col gap-4 h-[70vh] lg:h-auto">
         <div ref={containerRef} className="flex-1 w-full h-full rounded-lg border border-border/30 overflow-hidden">
           <canvas
