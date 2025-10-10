@@ -33,11 +33,32 @@ export default function DashboardPage() {
   const router = useRouter();
   const [isCreateMenuOpen, setCreateMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1500); 
+
+    let user = localStorage.getItem('nebulaUser');
+    if (!user) {
+      user = prompt('Hey, what should I call you?');
+      if (user) {
+        localStorage.setItem('nebulaUser', user);
+      } else {
+        user = 'dreamer';
+      }
+    }
+
+    const getGreetingMessage = (name: string) => {
+      const hour = new Date().getHours();
+      if (hour < 12) return `Good morning, ${name} ☀️`;
+      if (hour < 18) return `Good afternoon, ${name} 🌤️`;
+      return `Welcome back, ${name} 🌙`;
+    };
+
+    setGreeting(getGreetingMessage(user));
+    
     return () => clearTimeout(timer);
   }, []);
 
@@ -94,8 +115,8 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.2, ease: "easeOut" } }}
         className="text-center mb-12"
       >
-        <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
-          Workspace
+        <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-400 to-purple-300 animate-fade-in-down opacity-0">
+          {greeting}
         </h1>
         <p className="mt-3 text-lg text-gray-400/80">Choose your destination</p>
       </motion.div>
