@@ -103,6 +103,23 @@ export default {
           '0%': { transform: 'translateX(-100%)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },
         },
+         'nebula-flow': {
+          '0%': { 'background-position': '0% 50%' },
+          '50%': { 'background-position': '100% 50%' },
+          '100%': { 'background-position': '0% 50%' },
+        },
+        'dive-in': {
+          '0%': { opacity: '0', transform: 'scale(0.8) translateY(20px)' },
+          '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+        },
+        'fade-out-up': {
+          from: { opacity: '1', transform: 'translateY(0)' },
+          to: { opacity: '0', transform: 'translateY(-50px)' },
+        },
+        'fade-in-down': {
+          from: { opacity: '0', transform: 'translateY(-20px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -111,6 +128,10 @@ export default {
         'fade-out': 'fade-out 0.3s ease-in-out forwards',
         'slide-in-from-right': 'slide-in-from-right 0.3s ease-in-out',
         'slide-in-from-left': 'slide-in-from-left 0.3s ease-in-out',
+        'nebula-flow': 'nebula-flow 25s ease infinite',
+        'dive-in': 'dive-in 1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'fade-out-up': 'fade-out-up 0.5s ease-out forwards',
+        'fade-in-down': 'fade-in-down 0.7s ease-out forwards',
       },
     },
   },
