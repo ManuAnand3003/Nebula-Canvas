@@ -130,40 +130,42 @@
   }
 
   /* Orbit animation styles */
-  @keyframes sun-to-night {
-    0% { offset-distance: 100%; opacity: 1; }
-    50% { opacity: 0; }
-    100% { offset-distance: 0%; opacity: 0; }
-  }
-  @keyframes moon-to-night {
-    0% { offset-distance: 0%; opacity: 0; }
-    50% { opacity: 1; }
-    100% { offset-distance: 100%; opacity: 1; }
-  }
-
-  @keyframes sun-to-day {
-    0% { offset-distance: 0%; opacity: 0; }
-    50% { opacity: 1; }
-    100% { offset-distance: 100%; opacity: 1; }
-  }
-  @keyframes moon-to-day {
-    0% { offset-distance: 100%; opacity: 1; }
-    50% { opacity: 0; }
-    100% { offset-distance: 0%; opacity: 0; }
-  }
-
   .theme-orbit-container {
-    offset-path: path("M10,10 Q100,50 190,10");
+    offset-path: path("M-10,0 Q100,50 210,0");
   }
 
+  .celestial-body {
+    offset-anchor: center;
+    transition: opacity 1.2s ease-in-out, offset-distance 1.2s ease-in-out;
+  }
+
+  @keyframes sun-to-night {
+    from { offset-distance: 50%; opacity: 1; }
+    to { offset-distance: 0%; opacity: 0; }
+  }
   .animate-sun-to-night {
     animation: sun-to-night 1.2s ease-in-out forwards;
+  }
+
+  @keyframes moon-to-night {
+    from { offset-distance: 100%; opacity: 0; }
+    to { offset-distance: 50%; opacity: 1; }
   }
   .animate-moon-to-night {
     animation: moon-to-night 1.2s ease-in-out forwards;
   }
+
+  @keyframes sun-to-day {
+    from { offset-distance: 0%; opacity: 0; }
+    to { offset-distance: 50%; opacity: 1; }
+  }
   .animate-sun-to-day {
     animation: sun-to-day 1.2s ease-in-out forwards;
+  }
+
+  @keyframes moon-to-day {
+    from { offset-distance: 50%; opacity: 1; }
+    to { offset-distance: 100%; opacity: 0; }
   }
   .animate-moon-to-day {
     animation: moon-to-day 1.2s ease-in-out forwards;
