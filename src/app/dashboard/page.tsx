@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30, scale: 0.98 },
@@ -42,6 +43,7 @@ export default function DashboardPage() {
       icon: StickyNote,
       path: "/dashboard/notes",
       color: "text-purple-400",
+      gradient: "from-purple-500/10 to-background",
     },
     {
       title: "Tasks",
@@ -49,6 +51,7 @@ export default function DashboardPage() {
       icon: ListChecks,
       path: "/dashboard/tasks",
       color: "text-cyan-400",
+      gradient: "from-cyan-500/10 to-background",
     },
     {
       title: "Canvas",
@@ -56,6 +59,7 @@ export default function DashboardPage() {
       icon: PenSquare,
       path: "/dashboard/canvas",
       color: "text-pink-400",
+      gradient: "from-pink-500/10 to-background",
     },
   ];
 
@@ -95,7 +99,7 @@ export default function DashboardPage() {
             onClick={() => navigateTo(section.path)}
             className="cursor-pointer"
           >
-            <Card className="bg-card/50 backdrop-blur-xl border border-border/20 h-full rounded-2xl shadow-lg hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300">
+            <Card className="bg-card/50 backdrop-blur-xl border border-border/20 h-full rounded-2xl shadow-lg hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300 overflow-hidden">
               <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
                 <div className={`p-3 bg-primary/10 rounded-xl ${section.color}`}>
                   <section.icon className="h-8 w-8" />
@@ -106,8 +110,8 @@ export default function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="h-32 rounded-lg bg-background/40 flex items-center justify-center">
-                  <p className="text-sm text-muted-foreground italic">Preview coming soon...</p>
+                <div className={cn("h-32 rounded-lg bg-gradient-to-br flex items-center justify-center relative overflow-hidden", section.gradient)}>
+                   <div className="absolute inset-0 bg-repeat-x bg-center opacity-20 animate-nebula-flow" style={{backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(0deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '20px 20px'}}/>
                 </div>
               </CardContent>
             </Card>
