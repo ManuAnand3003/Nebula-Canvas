@@ -38,6 +38,9 @@ export default function DashboardPage() {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  const sunRef = useRef<SVGSVGElement>(null);
+  const moonRef = useRef<SVGSVGElement>(null);
+
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('nebulaTheme') || 'dark';
@@ -86,6 +89,24 @@ export default function DashboardPage() {
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
+    const sun = sunRef.current;
+    const moon = moonRef.current;
+
+    if (sun && moon) {
+      sun.classList.remove('animate-sun-to-day', 'animate-sun-to-night');
+      moon.classList.remove('animate-moon-to-day', 'animate-moon-to-night');
+      void sun.offsetWidth; // Trigger reflow
+      void moon.offsetWidth; // Trigger reflow
+
+      if (newTheme === 'dark') {
+        sun.classList.add('animate-sun-to-night');
+        moon.classList.add('animate-moon-to-night');
+      } else {
+        sun.classList.add('animate-sun-to-day');
+        moon.classList.add('animate-moon-to-day');
+      }
+    }
+
     setTheme(newTheme);
     localStorage.setItem('nebulaTheme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
@@ -144,8 +165,34 @@ export default function DashboardPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }}
       exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeIn" } }}
-      className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-gradient-to-br from-background via-background/80 to-background animate-nebula-flow"
+      className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-gradient-to-br from-background via-background/80 to-background animate-nebula-flow"
     >
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200px] h-[60px]">
+        <svg viewBox="0 0 200 60" className="w-full h-full">
+            <path d="M-50,60 A100,50 0 1,1 250,60" fill="none" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="2" />
+        </svg>
+        <div className="theme-orbit-container absolute inset-0">
+          <Sun
+            ref={sunRef}
+            onClick={toggleTheme}
+            className={cn(
+              "h-8 w-8 absolute text-yellow-400 cursor-pointer transition-opacity duration-500",
+              theme === 'light' ? 'opacity-100' : 'opacity-0'
+            )}
+            style={{ offsetDistance: '100%' }}
+          />
+          <Moon
+            ref={moonRef}
+            onClick={toggleTheme}
+            className={cn(
+              "h-7 w-7 absolute text-slate-300 cursor-pointer transition-opacity duration-500",
+              theme === 'dark' ? 'opacity-100' : 'opacity-0'
+            )}
+            style={{ offsetDistance: '100%' }}
+          />
+        </div>
+      </div>
+      
       <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
         <Button
           variant="outline"
@@ -155,16 +202,6 @@ export default function DashboardPage() {
           aria-label="Toggle background music"
         >
           <AudioLines className={cn("h-5 w-5 transition-all", isMusicPlaying ? "animate-audio-wave" : "")} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleTheme}
-          className="text-muted-foreground hover:text-foreground"
-          aria-label="Toggle theme"
-        >
-          <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </Button>
       </div>
 
