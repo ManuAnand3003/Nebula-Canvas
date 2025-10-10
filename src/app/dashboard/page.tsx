@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { StickyNote, ListChecks, PenSquare, Plus, Sun, Moon, Music, VolumeX } from "lucide-react";
+import { StickyNote, ListChecks, PenSquare, Plus, Sun, Moon, AudioLines, VolumeX } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
@@ -148,13 +148,13 @@ export default function DashboardPage() {
     >
       <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           onClick={toggleMusic}
-          className="text-muted-foreground hover:text-foreground"
+          className="rounded-full shadow-lg bg-card/70 backdrop-blur-xl border-border/30"
           aria-label="Toggle background music"
         >
-          {isMusicPlaying ? <Music className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+          {isMusicPlaying ? <AudioLines className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
@@ -289,3 +289,5 @@ export default function DashboardPage() {
     </motion.main>
   );
 }
+
+    
