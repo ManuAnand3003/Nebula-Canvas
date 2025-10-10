@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { StickyNote, ListChecks, PenSquare, Plus, Sun, Moon, AudioLines, VolumeX } from "lucide-react";
+import { StickyNote, ListChecks, PenSquare, Plus, Sun, Moon, AudioLines } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
@@ -154,7 +154,7 @@ export default function DashboardPage() {
           className="rounded-full shadow-lg bg-card/70 backdrop-blur-xl border-border/30"
           aria-label="Toggle background music"
         >
-          {isMusicPlaying ? <AudioLines className="h-5 w-5 animate-audio-wave" /> : <VolumeX className="h-5 w-5" />}
+          <AudioLines className={cn("h-5 w-5", isMusicPlaying && "animate-audio-wave")} />
         </Button>
         <Button
           variant="ghost"
@@ -288,3 +288,4 @@ export default function DashboardPage() {
       />
     </motion.main>
   );
+}
