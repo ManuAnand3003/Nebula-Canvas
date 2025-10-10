@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { StickyNote, ListChecks, PenSquare, Plus, X } from "lucide-react";
+import { StickyNote, ListChecks, PenSquare, Plus } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import LoadingScreen from '@/components/loading-screen';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30, scale: 0.98 },
@@ -31,6 +32,14 @@ const cardVariants = {
 export default function DashboardPage() {
   const router = useRouter();
   const [isCreateMenuOpen, setCreateMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500); 
+    return () => clearTimeout(timer);
+  }, []);
 
   const navigateTo = (path: string) => {
     router.push(path);
@@ -68,6 +77,10 @@ export default function DashboardPage() {
     { icon: ListChecks, path: '/dashboard/tasks', angle: 0, label: 'Task' },
     { icon: PenSquare, path: '/dashboard/canvas', angle: 60, label: 'Canvas' },
   ];
+
+  if (isLoading) {
+    return <LoadingScreen onLoaded={() => setIsLoading(false)} />;
+  }
 
   return (
     <motion.main
