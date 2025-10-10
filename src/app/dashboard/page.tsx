@@ -145,25 +145,25 @@ export default function DashboardPage() {
       exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeIn" } }}
       className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-gradient-to-br from-background via-background/80 to-background animate-nebula-flow"
     >
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200px] h-[60px]">
-        <div className="theme-orbit-container absolute inset-0">
-          <svg viewBox="0 0 200 40" className="w-full h-auto overflow-visible">
-              <path d="M-10,0 Q100,50 210,0" fill="none" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="2" />
-          </svg>
-          <Sun
-            onClick={toggleTheme}
-            className={cn(
-              "h-8 w-8 absolute text-yellow-400 cursor-pointer celestial-body",
-              theme === 'dark' ? 'animate-sun-to-night' : 'animate-sun-to-day'
-            )}
-          />
-          <Moon
-            onClick={toggleTheme}
-            className={cn(
-              "h-7 w-7 absolute text-slate-300 cursor-pointer celestial-body",
-              theme === 'dark' ? 'animate-moon-to-night' : 'animate-moon-to-day'
-            )}
-          />
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[200px] h-[60px]">
+        <div className="theme-orbit-container">
+            <svg viewBox="0 0 200 40" className="w-full h-auto overflow-visible">
+              <path d="M-10,40 Q100,-10 210,40" fill="none" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="2" />
+            </svg>
+            <div
+                onClick={toggleTheme}
+                className={cn(
+                    "celestial-body sun",
+                    theme === 'dark' ? 'sun-to-night' : 'sun-to-day'
+                )}
+            />
+            <div
+                onClick={toggleTheme}
+                className={cn(
+                    "celestial-body moon",
+                    theme === 'dark' ? 'moon-to-night' : 'moon-to-day'
+                )}
+            />
         </div>
       </div>
       
