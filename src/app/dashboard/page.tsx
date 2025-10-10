@@ -70,7 +70,7 @@ export default function DashboardPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }}
       exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeIn" } }}
-      className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-gradient-to-br from-background via-[#121212] to-background animate-nebula-flow"
+      className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-gradient-to-br from-background via-[#121212] to-background animate-nebula-flow"
     >
       <motion.div
         initial={{ opacity: 0, y: -20 }}
