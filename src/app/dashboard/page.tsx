@@ -1,90 +1,109 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StickyNote, ListChecks, PenSquare, Wind } from "lucide-react";
-import NotesSection from '@/components/notes-section';
-import TasksSection from '@/components/tasks-section';
-import CanvasSection from '@/components/canvas-section';
-import { cn } from "@/lib/utils";
+import { StickyNote, ListChecks, PenSquare } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { motion } from 'framer-motion';
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.98 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      delay: i * 0.15 + 0.5,
+      duration: 0.6,
+      ease: [0.25, 1, 0.5, 1],
+    },
+  }),
+  hover: {
+    scale: 1.04,
+    y: -5,
+    transition: { type: 'spring', stiffness: 300, damping: 15 }
+  }
+};
 
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState("notes");
-  const [prevTab, setPrevTab] = useState("notes");
   const router = useRouter();
 
-  const handleTabChange = (value: string) => {
-    setPrevTab(activeTab);
-    setActiveTab(value);
+  const navigateTo = (path: string) => {
+    router.push(path);
   };
 
-  const getAnimationClass = (tabValue: string) => {
-    if (tabValue !== activeTab) return "animate-fade-out";
-    
-    const tabOrder = ["notes", "tasks", "canvas"];
-    const activeIndex = tabOrder.indexOf(activeTab);
-    const prevIndex = tabOrder.indexOf(prevTab);
-
-    if (activeIndex > prevIndex) {
-      return "animate-slide-in-from-right";
-    } else if (activeIndex < prevIndex) {
-      return "animate-slide-in-from-left";
-    }
-    return "animate-fade-in";
-  };
-
+  const sections = [
+    {
+      title: "Notes",
+      description: "Capture your thoughts",
+      icon: StickyNote,
+      path: "/dashboard/notes",
+      color: "text-purple-400",
+    },
+    {
+      title: "Tasks",
+      description: "Organize your life",
+      icon: ListChecks,
+      path: "/dashboard/tasks",
+      color: "text-cyan-400",
+    },
+    {
+      title: "Canvas",
+      description: "Unleash your creativity",
+      icon: PenSquare,
+      path: "/dashboard/canvas",
+      color: "text-pink-400",
+    },
+  ];
 
   return (
-    <motion.main 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-      className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-gradient-to-br from-background to-slate-900"
+    <motion.main
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }}
+      exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeIn" } }}
+      className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-gradient-to-br from-background via-[#121212] to-background animate-nebula-flow"
     >
-      <div className="w-full max-w-7xl mx-auto bg-card/60 backdrop-blur-2xl border border-border/30 rounded-2xl shadow-2xl overflow-hidden">
-        <Tabs defaultValue="notes" value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <div className="flex flex-wrap items-center justify-between p-4 border-b border-border/30 gap-4">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push('/')}>
-              <div className="p-2 bg-primary/20 rounded-lg">
-                <Wind className="text-primary h-6 w-6" />
-              </div>
-              <h1 className="text-xl font-bold text-foreground">Nebula Desk</h1>
-            </div>
-            <TabsList className="bg-background/70 rounded-lg p-1">
-              <TabsTrigger value="notes" className="gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary-foreground">
-                <StickyNote className="h-4 w-4" />
-                Notes
-              </TabsTrigger>
-              <TabsTrigger value="tasks" className="gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary-foreground">
-                <ListChecks className="h-4 w-4" />
-                Tasks
-              </TabsTrigger>
-              <TabsTrigger value="canvas" className="gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary-foreground">
-                <PenSquare className="h-4 w-4" />
-                Canvas
-              </TabsTrigger>
-            </TabsList>
-          </div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.2, ease: "easeOut" } }}
+        className="text-center mb-12"
+      >
+        <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+          Workspace
+        </h1>
+        <p className="mt-3 text-lg text-gray-400/80">Choose your destination</p>
+      </motion.div>
 
-          <TabsContent value="notes" forceMount className={cn("p-4 sm:p-6 min-h-[75vh]", activeTab !== "notes" && "hidden")}>
-             <div className={getAnimationClass("notes")}>
-              <NotesSection />
-            </div>
-          </TabsContent>
-          <TabsContent value="tasks" forceMount className={cn("p-4 sm:p-6 min-h-[75vh]", activeTab !== "tasks" && "hidden")}>
-            <div className={getAnimationClass("tasks")}>
-              <TasksSection />
-            </div>
-          </TabsContent>
-          <TabsContent value="canvas" forceMount className={cn("p-4 sm:p-6 min-h-[75vh]", activeTab !== "canvas" && "hidden")}>
-            <div className={getAnimationclass("canvas")}>
-              <CanvasSection />
-            </div>
-          </TabsContent>
-        </Tabs>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+        {sections.map((section, index) => (
+          <motion.div
+            key={section.title}
+            custom={index}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover="hover"
+            onClick={() => navigateTo(section.path)}
+            className="cursor-pointer"
+          >
+            <Card className="bg-card/50 backdrop-blur-xl border border-border/20 h-full rounded-2xl shadow-lg hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300">
+              <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
+                <div className={`p-3 bg-primary/10 rounded-xl ${section.color}`}>
+                  <section.icon className="h-8 w-8" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl font-bold text-foreground">{section.title}</CardTitle>
+                  <CardDescription className="text-muted-foreground/80">{section.description}</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-32 rounded-lg bg-background/40 flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground italic">Preview coming soon...</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
     </motion.main>
   );
