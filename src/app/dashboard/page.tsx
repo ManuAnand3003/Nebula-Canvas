@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { StickyNote, ListChecks, PenSquare, Plus, Sun, Moon, AudioLines } from "lucide-react";
+import { StickyNote, ListChecks, PenSquare, Plus, AudioLines } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
@@ -34,13 +34,12 @@ export default function DashboardPage() {
   const [isCreateMenuOpen, setCreateMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [greeting, setGreeting] = useState('');
-  const [theme, setTheme] = useState('dark');
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   
   useEffect(() => {
+    // Set initial theme from localStorage
     const savedTheme = localStorage.getItem('nebulaTheme') || 'dark';
-    setTheme(savedTheme);
     document.documentElement.classList.toggle('dark', savedTheme === 'dark');
 
     const savedMusicPref = localStorage.getItem('music') === 'on';
@@ -81,13 +80,6 @@ export default function DashboardPage() {
 
   const navigateTo = (path: string) => {
     router.push(path);
-  };
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('nebulaTheme', newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
   const toggleMusic = () => {
@@ -145,27 +137,6 @@ export default function DashboardPage() {
       exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeIn" } }}
       className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-gradient-to-br from-background via-background/80 to-background animate-nebula-flow"
     >
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[200px] h-[60px]">
-        <div className="theme-orbit-container">
-            <svg viewBox="0 0 200 40" className="w-full h-auto overflow-visible">
-              <path d="M-10,40 Q100,-10 210,40" fill="none" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="2" />
-            </svg>
-            <div
-                onClick={toggleTheme}
-                className={cn(
-                    "celestial-body sun",
-                    theme === 'dark' ? 'sun-to-night' : 'sun-to-day'
-                )}
-            />
-            <div
-                onClick={toggleTheme}
-                className={cn(
-                    "celestial-body moon",
-                    theme === 'dark' ? 'moon-to-night' : 'moon-to-day'
-                )}
-            />
-        </div>
-      </div>
       
       <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
         <Button
