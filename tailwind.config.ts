@@ -97,6 +97,13 @@ const config: Config = {
         'fade-in-down': {
           from: { opacity: '0', transform: 'translateY(-20px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'audio-wave': {
+          '0%': { transform: 'scaleY(0.4)' },
+          '25%': { transform: 'scaleY(1)' },
+          '50%': { transform: 'scaleY(0.6)' },
+          '75%': { transform: 'scaleY(0.8)' },
+          '100%': { transform: 'scaleY(0.4)' },
         }
       },
       animation: {
@@ -106,6 +113,7 @@ const config: Config = {
         'dive-in': 'dive-in 1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         'fade-out-up': 'fade-out-up 0.5s ease-out forwards',
         'fade-in-down': 'fade-in-down 0.7s ease-out forwards',
+        'audio-wave': 'audio-wave 1.5s ease-in-out infinite'
       },
     },
   },

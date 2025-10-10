@@ -154,7 +154,7 @@ export default function DashboardPage() {
           className="rounded-full shadow-lg bg-card/70 backdrop-blur-xl border-border/30"
           aria-label="Toggle background music"
         >
-          {isMusicPlaying ? <AudioLines className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+          {isMusicPlaying ? <AudioLines className="h-5 w-5 animate-audio-wave" /> : <VolumeX className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
@@ -288,6 +288,3 @@ export default function DashboardPage() {
       />
     </motion.main>
   );
-}
-
-    
