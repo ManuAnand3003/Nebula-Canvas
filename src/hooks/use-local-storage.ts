@@ -3,21 +3,24 @@
 import { useState, useEffect, useCallback } from 'react';
 
 function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
-  const [storedValue, setStoredValue] = useState<T>(initialValue);
-
-  useEffect(() => {
-    // This runs only on the client
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    if (typeof window === 'undefined') {
+      return initialValue;
+    }
     try {
       const item = window.localStorage.getItem(key);
-      if (item) {
-        setStoredValue(JSON.parse(item));
-      }
+      return item ? JSON.parse(item) : initialValue;
     } catch (error) {
       console.error(`Error reading localStorage key “${key}”:`, error);
+      return initialValue;
     }
-  }, [key]);
+  });
 
   const setValue = useCallback((value: T | ((val: T) => T)) => {
+    if (typeof window === 'undefined') {
+      console.warn(`Tried to set localStorage key “${key}” even though window is not available.`);
+      return;
+    }
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
@@ -28,6 +31,8 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
   }, [key, storedValue]);
 
   useEffect(() => {
+    if(typeof window === 'undefined') return;
+
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === key && e.newValue) {
         try {

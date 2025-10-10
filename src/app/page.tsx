@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import DashboardPage from '@/app/dashboard/page';
 
 export default function Home() {
   const [isDiving, setIsDiving] = useState(false);
