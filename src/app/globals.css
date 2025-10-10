@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 224 71% 4%;
-    --foreground: 210 40% 98%;
-    --card: 224 71% 8%;
-    --card-foreground: 210 40% 98%;
-    --popover: 224 71% 4%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 259 95% 68%;
+    --background: 220 40% 98%;
+    --foreground: 224 71% 4%;
+    --card: 220 30% 94%;
+    --card-foreground: 224 71% 10%;
+    --popover: 220 40% 98%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 259 95% 60%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 198 93% 60%;
-    --accent-foreground: 224 71% 4%;
+    --secondary: 220 20% 90%;
+    --secondary-foreground: 224 71% 4%;
+    --muted: 220 20% 90%;
+    --muted-foreground: 224 71% 25%;
+    --accent: 259 95% 68%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 217 33% 27%;
-    --input: 217 33% 17%;
-    --ring: 259 95% 68%;
+    --border: 220 20% 88%;
+    --input: 220 20% 88%;
+    --ring: 259 95% 60%;
     --radius: 0.75rem;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -65,6 +65,10 @@
   }
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.5s, color 0.5s;
+  }
+  html.dark body {
+    background-image: bg-gradient-to-br from-[#0B0F19] via-[#121212] to-[#0B0F19];
   }
 }
 

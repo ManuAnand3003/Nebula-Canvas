@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { StickyNote, ListChecks, PenSquare, Plus } from "lucide-react";
+import { StickyNote, ListChecks, PenSquare, Plus, Sun, Moon } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
@@ -34,6 +34,13 @@ export default function DashboardPage() {
   const [isCreateMenuOpen, setCreateMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [greeting, setGreeting] = useState('');
+  const [theme, setTheme] = useState('dark');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('nebulaTheme') || 'dark';
+    setTheme(savedTheme);
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -64,6 +71,13 @@ export default function DashboardPage() {
 
   const navigateTo = (path: string) => {
     router.push(path);
+  };
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('nebulaTheme', newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
   const sections = [
@@ -108,17 +122,28 @@ export default function DashboardPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }}
       exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeIn" } }}
-      className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-gradient-to-br from-background via-[#121212] to-background animate-nebula-flow"
+      className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-gradient-to-br from-background via-background/80 to-background animate-nebula-flow"
     >
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleTheme}
+        className="fixed top-6 right-6 z-50 text-muted-foreground hover:text-foreground"
+        aria-label="Toggle theme"
+      >
+        <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+        <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      </Button>
+
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.2, ease: "easeOut" } }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-400 to-purple-300 animate-fade-in-down opacity-0">
+        <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-pink-400 to-primary/80 animate-fade-in-down opacity-0">
           {greeting}
         </h1>
-        <p className="mt-3 text-lg text-gray-400/80">Choose your destination</p>
+        <p className="mt-3 text-lg text-muted-foreground/80">Choose your destination</p>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
@@ -145,7 +170,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className={cn("h-32 rounded-lg bg-gradient-to-br flex items-center justify-center relative overflow-hidden", section.gradient)}>
-                   <div className="absolute inset-0 bg-repeat-x bg-center opacity-20 animate-nebula-flow" style={{backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(0deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '20px 20px'}}/>
+                   <div className="absolute inset-0 bg-repeat-x bg-center opacity-20 animate-nebula-flow" style={{backgroundImage: 'linear-gradient(90deg, hsla(var(--foreground)/0.05) 1px, transparent 1px), linear-gradient(0deg, hsla(var(--foreground)/0.05) 1px, transparent 1px)', backgroundSize: '20px 20px'}}/>
                 </div>
               </CardContent>
             </Card>
