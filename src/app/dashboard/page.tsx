@@ -1,10 +1,10 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { StickyNote, ListChecks, PenSquare, Plus, Sun, Moon } from "lucide-react";
+import { StickyNote, ListChecks, PenSquare, Plus, Sun, Moon, Music, VolumeX } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import LoadingScreen from '@/components/loading-screen';
@@ -35,11 +35,22 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [greeting, setGreeting] = useState('');
   const [theme, setTheme] = useState('dark');
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('nebulaTheme') || 'dark';
     setTheme(savedTheme);
     document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+
+    const savedMusicPref = localStorage.getItem('music') === 'on';
+    setIsMusicPlaying(savedMusicPref);
+    
+    if (savedMusicPref && audioRef.current) {
+        audioRef.current.play().catch(e => console.error("Audio autoplay was prevented.", e));
+    }
+
   }, []);
 
   useEffect(() => {
@@ -78,6 +89,17 @@ export default function DashboardPage() {
     setTheme(newTheme);
     localStorage.setItem('nebulaTheme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
+  };
+
+  const toggleMusic = () => {
+    const musicIsOn = !isMusicPlaying;
+    setIsMusicPlaying(musicIsOn);
+    localStorage.setItem('music', musicIsOn ? 'on' : 'off');
+    if (musicIsOn) {
+      audioRef.current?.play();
+    } else {
+      audioRef.current?.pause();
+    }
   };
 
   const sections = [
@@ -124,16 +146,27 @@ export default function DashboardPage() {
       exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeIn" } }}
       className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-gradient-to-br from-background via-background/80 to-background animate-nebula-flow"
     >
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={toggleTheme}
-        className="fixed top-6 right-6 z-50 text-muted-foreground hover:text-foreground"
-        aria-label="Toggle theme"
-      >
-        <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      </Button>
+      <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleMusic}
+          className="text-muted-foreground hover:text-foreground"
+          aria-label="Toggle background music"
+        >
+          {isMusicPlaying ? <Music className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          className="text-muted-foreground hover:text-foreground"
+          aria-label="Toggle theme"
+        >
+          <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        </Button>
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -248,6 +281,11 @@ export default function DashboardPage() {
           </motion.div>
         </div>
       </div>
+      <audio
+        ref={audioRef}
+        loop
+        src="https://www.soundjay.com/buttons/sounds/button-1.mp3" // NOTE: Replace this with your local audio file
+      />
     </motion.main>
   );
 }
