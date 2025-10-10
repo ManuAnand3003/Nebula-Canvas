@@ -154,7 +154,7 @@ export default function DashboardPage() {
           className="rounded-full shadow-lg bg-card/70 backdrop-blur-xl border-border/30"
           aria-label="Toggle background music"
         >
-          <AudioLines className={cn("h-5 w-5", isMusicPlaying && "animate-audio-wave")} />
+          <AudioLines className={cn("h-5 w-5 transition-all", isMusicPlaying ? "animate-audio-wave" : "")} />
         </Button>
         <Button
           variant="ghost"
