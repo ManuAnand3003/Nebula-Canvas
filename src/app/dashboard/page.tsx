@@ -169,7 +169,7 @@ export default function DashboardPage() {
     >
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200px] h-[60px]">
         <svg viewBox="0 0 200 60" className="w-full h-full">
-            <path d="M-50,60 A100,50 0 1,1 250,60" fill="none" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="2" />
+            <path d="M10,10 Q100,50 190,10" fill="none" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="2" />
         </svg>
         <div className="theme-orbit-container absolute inset-0">
           <Sun
