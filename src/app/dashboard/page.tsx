@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRouter } from 'next/navigation';
@@ -247,20 +248,20 @@ export default function DashboardPage() {
               ))}
           </AnimatePresence>
 
-          <motion.div whileTap={{ scale: 0.9 }} className="flex flex-col items-center">
+          <motion.div whileTap={{ scale: 0.9 }}>
             <Button
               onClick={() => setCreateMenuOpen(!isCreateMenuOpen)}
-              className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/50 border-2 border-primary/50 shadow-[0_0_20px_theme(colors.primary/50%)] hover:bg-primary/40 hover:shadow-[0_0_30px_theme(colors.primary/70%)] transition-all duration-300 ease-in-out flex items-center justify-center"
+              className="h-24 w-24 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/50 border-2 border-primary/50 shadow-[0_0_20px_theme(colors.primary/50%)] hover:bg-primary/40 hover:shadow-[0_0_30px_theme(colors.primary/70%)] transition-all duration-300 ease-in-out flex flex-col items-center justify-center pt-2"
               aria-expanded={isCreateMenuOpen}
             >
               <motion.div
                  animate={{ rotate: isCreateMenuOpen ? 45 : 0 }}
                  transition={{ duration: 0.3 }}
               >
-                <Plus className="h-10 w-10 text-white" />
+                <Plus className="h-8 w-8 text-white" />
               </motion.div>
+              <span className="font-cursive text-xl text-white pointer-events-none -mt-1">Create</span>
             </Button>
-            <span className="mt-2 font-cursive text-xl text-primary pointer-events-none">Create</span>
           </motion.div>
         </div>
       </div>
