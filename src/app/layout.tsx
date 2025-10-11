@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   title: 'Nebula Desk',
   description: 'Notes, tasks, and drawings, all in one offline-first app.',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/nebula-icon.jpg',
+    apple: '/icons/icon-192x192.png',
+  },
 };
 
 export default function RootLayout({
@@ -23,6 +27,8 @@ export default function RootLayout({
       <head>
         <meta name="theme-color" content="#0B0F19" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png"></link>
+        {/* Use nebula-icon.jpg from public/ as the favicon */}
+        <link rel="icon" href="/nebula-icon.jpg" />
       </head>
       <body className={`${inter.variable} ${caveat.variable} font-body antialiased`}>
         {children}
