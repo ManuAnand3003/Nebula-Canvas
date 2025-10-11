@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { Inter } from 'next/font/google';
+import { Inter, Caveat } from 'next/font/google';
 import PwaLoader from '@/components/pwa-loader';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const caveat = Caveat({ subsets: ['latin'], variable: '--font-caveat' });
 
 export const metadata: Metadata = {
   title: 'Nebula Desk',
@@ -23,7 +24,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#0B0F19" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png"></link>
       </head>
-      <body className={`${inter.variable} font-body antialiased`}>
+      <body className={`${inter.variable} ${caveat.variable} font-body antialiased`}>
         {children}
         <Toaster />
         <PwaLoader />

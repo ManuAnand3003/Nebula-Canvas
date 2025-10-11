@@ -23,6 +23,7 @@ const config: Config = {
         sans: ['var(--font-inter)', ...fontFamily.sans],
         body: ['Inter', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],
+        cursive: ['var(--font-caveat)', 'cursive'],
         code: ['monospace'],
       },
       colors: {
