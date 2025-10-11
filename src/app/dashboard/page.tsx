@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { StickyNote, ListChecks, PenSquare, Plus, AudioLines } from "lucide-react";
+import { StickyNote, ListChecks, PenSquare, Plus, AudioLines, Home } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
