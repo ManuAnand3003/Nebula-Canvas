@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRouter } from 'next/navigation';
@@ -268,7 +267,7 @@ export default function DashboardPage() {
       <audio
         ref={audioRef}
         loop
-        src="https://www.soundjay.com/buttons/sounds/button-1.mp3" // NOTE: Replace this with your local audio file
+        src="/sounds/nebula-music.mp3"
       />
     </motion.main>
   );
