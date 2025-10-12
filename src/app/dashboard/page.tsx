@@ -157,11 +157,10 @@ export default function DashboardPage() {
       >
         <div className="relative inline-block">
           <div className="absolute -inset-2 rounded-2xl blur-xl opacity-30 bg-gradient-to-r from-purple-600 via-indigo-500 to-pink-500" />
-          <h1 className="relative text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-300 to-white animate-fade-in-down opacity-0">
+          <h1 className="relative text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-300 to-white">
             {greeting}
           </h1>
-        </div>
-        <p className="mt-3 text-lg text-muted-foreground/80">Choose your destination</p>
+        </div>        <p className="mt-3 text-lg text-muted-foreground/80">Choose your destination</p>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">

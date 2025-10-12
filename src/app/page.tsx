@@ -32,8 +32,7 @@ export default function Home() {
             className="relative flex min-h-screen flex-col items-center justify-center p-4 bg-transparent animate-nebula-flow"
           >
             <Hero />
-            <div className="absolute inset-0 bg-black/40 -z-5 pointer-events-none" />
-            <div className="relative z-10 flex flex-col items-center justify-center text-center animate-dive-in w-full px-6">
+            <div className="absolute inset-0 bg-black/40 -z-[5] pointer-events-none" />            <div className="relative z-10 flex flex-col items-center justify-center text-center animate-dive-in w-full px-6">
               <h1 className="text-6xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-300 drop-shadow-2xl">Nebula Canvas</h1>
               <p className="mt-4 text-xl md:text-2xl text-white/80 max-w-2xl">Your cosmic productivity hub — notes, tasks and drawing, all in one orbit.</p>
 

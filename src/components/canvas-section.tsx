@@ -210,7 +210,7 @@ export default function CanvasSection() {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-              <DropdownMenuRadioGroup value={sortKey} onValueChange={(v) => setSortKey(v as any)}>
+              <DropdownMenuRadioGroup value={sortKey} onValueChange={(v) => setSortKey(v as 'date' | 'name')}>
                 <DropdownMenuRadioItem value="date">Date</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="name">Name</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
@@ -230,21 +230,28 @@ export default function CanvasSection() {
         ) : (
           <div className="grid grid-cols-2 gap-4 overflow-y-auto max-h-[calc(75vh-100px)] p-2 -mr-2 pr-4">
             {(() => {
-              const sorted = [...drawings];
+              // preserve original index so deletion works correctly after sorting
+              const items = drawings.map((src, originalIndex) => ({
+                src,
+                originalIndex,
+                name: `Drawing ${originalIndex + 1}`,
+              }));
+
+              const sorted = [...items];
               sorted.sort((a, b) => {
                 if (sortKey === 'name') {
-                  return sortDir === 'asc' ? a.localeCompare(b) : b.localeCompare(a);
+                  return sortDir === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
                 }
-                // date by default (we saved newest first)
-                return sortDir === 'asc' ? 1 : -1;
+                // date by default: originalIndex 0 is newest (we unshift when saving)
+                return sortDir === 'asc' ? a.originalIndex - b.originalIndex : b.originalIndex - a.originalIndex;
               });
 
-              return sorted.map((drawing, index) => (
-                <Card key={`${index}-${drawing.slice(0,12)}`} className="relative group overflow-hidden bg-card/50 backdrop-blur-md border-border/30 aspect-w-1 aspect-h-1">
+              return sorted.map((item) => (
+                <Card key={`${item.originalIndex}-${item.src.slice(0,12)}`} className="relative group overflow-hidden bg-card/50 backdrop-blur-md border-border/30 aspect-w-1 aspect-h-1">
                   <CardContent className="p-0">
-                    <Image src={drawing} alt={`Drawing ${index + 1}`} layout="fill" objectFit="cover" className="transition-transform group-hover:scale-105" />
+                    <Image src={item.src} alt={`Drawing ${item.originalIndex + 1}`} layout="fill" objectFit="cover" className="transition-transform group-hover:scale-105" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button variant="destructive" size="icon" onClick={() => deleteDrawing(index)}>
+                      <Button variant="destructive" size="icon" onClick={() => deleteDrawing(item.originalIndex)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
