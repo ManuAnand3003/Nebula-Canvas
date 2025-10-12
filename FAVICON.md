@@ -6,61 +6,64 @@ This repository ships `public/nebula-icon.jpg` and the app-level layout already 
 
 What we added
 --------------
-- `scripts/make-favicon.js` — simple Node script that uses `sharp` (recommended) to generate a favicon from `public/nebula-icon.jpg`.
-- `package.json` script `make:favicon` so you can run `npm run make:favicon`.
+- `scripts/make-favicon.js` — simple Node script that uses `sharp` to generate a single-icon `favicon.ico` from `public/nebula-icon.jpg`.
+- `scripts/make-favicon-multi.js` — a newer script that generates a multi-resolution ICO (16/32/48/64) using `sharp` + `png-to-ico` (handles ESM import via dynamic import).
+- `scripts/favicon-hash.js` — computes a short md5 hash of `public/favicon.ico` for cache-busting.
+- `package.json` scripts:
+	- `make:favicon` — runs the simple generator.
+	- `make:favicon:multi` — runs the multi-ICO generator.
+	- `favicon:hash` — prints an 8-character hash for the generated favicon.
+	- `make:favicon:all` — runs the multi generator then the hash (used to update `src/app/layout.tsx` with a cache-busting query string).
 
 Quick start (Windows PowerShell)
 --------------------------------
-1. Install native dependency (sharp):
+1. Install dependencies (if not already installed):
 
 ```powershell
-npm install sharp
+npm install
 ```
 
-2. Generate `public/favicon.ico` from the project's nebula image:
+2. Generate a multi-resolution favicon and compute a short hash:
 
 ```powershell
-npm run make:favicon
+npm run make:favicon:multi
+npm run favicon:hash
 ```
 
-3. Verify in browser:
+3. Update the link in `src/app/layout.tsx` (if you want manual control):
+
+```tsx
+// in src/app/layout.tsx head
+<link rel="icon" href="/favicon.ico?v=<short-hash>" />
+```
+
+4. Verify in browser:
 - Open the site, do a hard refresh (Ctrl+F5) or open in a private/incognito window to avoid cached favicons.
 
-Caching and cache-busting tips
------------------------------
-- Browsers aggressively cache favicons. If you update `favicon.ico` but don't see changes, try:
-	- Hard-refresh (Ctrl+F5) or open a private window.
-	- Rename the favicon to `favicon-<hash>.ico` and update the link tag in `src/app/layout.tsx` or `metadata.icons` so the URL changes.
+Cache-busting workflow (recommended)
+----------------------------------
+1. Run `npm run make:favicon:multi` to regenerate `public/favicon.ico`.
+2. Run `npm run favicon:hash` and copy the 8-character hash it prints (for example `ce7a424d`).
+3. Update `src/app/layout.tsx` to use `/favicon.ico?v=<hash>` as the icon URL or commit the new hash to the repo.
+4. Restart the dev server and hard-refresh the browser (or open an incognito window).
 
-Next.js app-router metadata
----------------------------
-We set `metadata.icons` in `src/app/layout.tsx` so Next handles metadata where supported — this will generate metadata links for the app router. We also left an explicit `<link rel="icon" href="/nebula-icon.jpg" />` in the head as a fallback.
-
-Advanced: true multi-size ICO
-----------------------------
-The current `scripts/make-favicon.js` writes a single PNG into `public/favicon.ico`. If you need a proper multi-resolution ICO (16/32/48/64), use `png-to-ico` or `icotool`:
-
-Using `png-to-ico`:
-
-```powershell
-npm install png-to-ico sharp
-node -e "(async()=>{const sharp=require('sharp'), pngToIco=require('png-to-ico'), fs=require('fs'); const src='public/nebula-icon.jpg'; const sizes=[16,32,48,64]; const buffs=await Promise.all(sizes.map(s=>sharp(src).resize(s,s).png().toBuffer())); const ico=await pngToIco(buffs); fs.writeFileSync('public/favicon.ico', ico); console.log('wrote public/favicon.ico')})()"
-```
+Notes about `png-to-ico` and ESM
+--------------------------------
+`png-to-ico` is published as an ES module. If you attempt to `require('png-to-ico')` in a CommonJS context you'll see an error like `pngToIco is not a function` or other import-related failures. The repository includes `scripts/make-favicon-multi.js` which performs a dynamic `await import('png-to-ico')` (ESM-friendly) to avoid that problem. If you copy that script into other projects, make sure to use the dynamic import or run Node with `--experimental-specifier-resolution=node` and a proper ESM module mode.
 
 Verification checklist
 ----------------------
-- Ensure `public/favicon.ico` exists after running the script.
-- Confirm `src/app/layout.tsx` contains either a link to `/favicon.ico` or `metadata.icons` referencing the file.
-- Hard refresh / private window to check the new icon.
+- Ensure `public/favicon.ico` exists after running `make:favicon:multi`.
+- Confirm `src/app/layout.tsx` contains a link to `/favicon.ico?v=<hash>` or `metadata.icons` referencing the file.
+- Restart the dev server and hard refresh the page.
 
-If it still doesn't change
---------------------------
-1. Confirm the file is in the built `.next`/public output (if running production build).
-2. Restart the dev server — Next can serve static files at `/favicon.ico` automatically on dev.
-3. Try a different browser or device to see if caching is local.
-4. If your hosting provider uses a CDN, purge the CDN cache for `/favicon.ico`.
+Troubleshooting
+---------------
+- If the generator fails with ESM import errors, open `scripts/make-favicon-multi.js` and ensure it uses `await import('png-to-ico')`.
+- If the dev server still serves an old icon, restart Next (`npm run dev`) and hard refresh the browser.
+- If you deploy behind a CDN, purge the CDN cache for `/favicon.ico` or use the cache-busting query string approach above.
 
 Want me to run it here?
 ----------------------
-If you want I can run the generator in this environment (install `sharp` and run the script). Say "run favicon generator" and I'll execute it and report results.
+I can run the generator and print the hash here in this environment. Say "run favicon generator" and I'll execute the scripts and report results (I already ran them earlier and the current short-hash in this workspace is `ce7a424d`).
 

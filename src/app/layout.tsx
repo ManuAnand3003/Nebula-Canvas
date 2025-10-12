@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const caveat = Caveat({ subsets: ['latin'], variable: '--font-caveat' });
 
 export const metadata: Metadata = {
-  title: 'Nebula Desk',
+  title: 'Nebula Canvas',
   description: 'Notes, tasks, and drawings, all in one offline-first app.',
   manifest: '/manifest.json',
   icons: {

@@ -155,9 +155,12 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.2, ease: "easeOut" } }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-pink-400 to-primary/80 animate-fade-in-down opacity-0">
-          {greeting}
-        </h1>
+        <div className="relative inline-block">
+          <div className="absolute -inset-2 rounded-2xl blur-xl opacity-30 bg-gradient-to-r from-purple-600 via-indigo-500 to-pink-500" />
+          <h1 className="relative text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-300 to-white animate-fade-in-down opacity-0">
+            {greeting}
+          </h1>
+        </div>
         <p className="mt-3 text-lg text-muted-foreground/80">Choose your destination</p>
       </motion.div>
 
