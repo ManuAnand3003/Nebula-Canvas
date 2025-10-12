@@ -3,11 +3,21 @@
 import { useState } from 'react';
 import useLocalStorage from '@/hooks/use-local-storage';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuCheckboxItem,
+} from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Edit, StickyNote } from 'lucide-react';
+import { Plus, Trash2, Edit, StickyNote, ChevronsUpDown } from 'lucide-react';
 import { format } from 'date-fns';
 
 type Note = {
@@ -19,6 +29,8 @@ type Note = {
 
 export default function NotesSection() {
   const [notes, setNotes] = useLocalStorage<Note[]>('notes', []);
+  const [sortKey, setSortKey] = useLocalStorage<'date' | 'title' | 'size'>('notes-sort-key', 'date');
+  const [sortDir, setSortDir] = useLocalStorage<'asc' | 'desc'>('notes-sort-dir', 'desc');
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -58,9 +70,31 @@ export default function NotesSection() {
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">My Notes</h2>
-        <Button onClick={() => openDialog(null)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-          <Plus className="mr-2 h-4 w-4" /> Add Note
-        </Button>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" title="Sort">
+                <ChevronsUpDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+              <DropdownMenuRadioGroup value={sortKey} onValueChange={(v) => setSortKey(v as any)}>
+                <DropdownMenuRadioItem value="title">Name</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="date">Date</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="size">Size</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem checked={sortDir === 'asc'} onCheckedChange={(v) => setSortDir(v ? 'asc' : 'desc')}>
+                Ascending
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button onClick={() => openDialog(null)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Plus className="mr-2 h-4 w-4" /> Add Note
+          </Button>
+        </div>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -108,7 +142,20 @@ export default function NotesSection() {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {notes.map(note => (
+          {(() => {
+            const sorted = [...notes];
+            sorted.sort((a, b) => {
+              let res = 0;
+              if (sortKey === 'title') {
+                res = a.title.localeCompare(b.title);
+              } else if (sortKey === 'size') {
+                res = a.content.length - b.content.length;
+              } else {
+                res = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+              }
+              return sortDir === 'asc' ? res : -res;
+            });
+            return sorted.map(note => (
             <Card key={note.id} className="bg-card/50 backdrop-blur-md border-border/30 flex flex-col transition-transform hover:scale-[1.02] hover:shadow-lg">
               <CardHeader>
                 <CardTitle className="truncate">{note.title}</CardTitle>
@@ -128,7 +175,7 @@ export default function NotesSection() {
                 </Button>
               </CardFooter>
             </Card>
-          ))}
+          )); })()} 
         </div>
       )}
     </div>

@@ -3,6 +3,17 @@
 import { useState, useMemo } from 'react';
 import useLocalStorage from '@/hooks/use-local-storage';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuCheckboxItem,
+} from '@/components/ui/dropdown-menu';
+import { ChevronsUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -17,6 +28,8 @@ type Task = {
 
 export default function TasksSection() {
   const [tasks, setTasks] = useLocalStorage<Task[]>('tasks', []);
+  const [sortKey, setSortKey] = useLocalStorage<'date' | 'text' | 'category'>('tasks-sort-key', 'date');
+  const [sortDir, setSortDir] = useLocalStorage<'asc' | 'desc'>('tasks-sort-dir', 'desc');
   const [newTaskText, setNewTaskText] = useState('');
   const [newTaskCategory, setNewTaskCategory] = useState('');
 
@@ -44,17 +57,46 @@ export default function TasksSection() {
   };
   
   const tasksByCategory = useMemo(() => {
-    return tasks.reduce((acc, task) => {
+    const sorted = [...tasks];
+    sorted.sort((a, b) => {
+      let res = 0;
+      if (sortKey === 'text') res = a.text.localeCompare(b.text);
+      else if (sortKey === 'category') res = a.category.localeCompare(b.category);
+      else res = new Date(a.id ? Number(a.id) : 0).getTime() - new Date(b.id ? Number(b.id) : 0).getTime();
+      return sortDir === 'asc' ? res : -res;
+    });
+    return sorted.reduce((acc, task) => {
       (acc[task.category] = acc[task.category] || []).push(task);
       return acc;
     }, {} as Record<string, Task[]>);
-  }, [tasks]);
+  }, [tasks, sortKey, sortDir]);
 
   const categories = Object.keys(tasksByCategory).sort();
 
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">My Tasks</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold">My Tasks</h2>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" title="Sort">
+              <ChevronsUpDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+            <DropdownMenuRadioGroup value={sortKey} onValueChange={(v) => setSortKey(v as any)}>
+              <DropdownMenuRadioItem value="text">Name</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="category">Category</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="date">Date</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuCheckboxItem checked={sortDir === 'asc'} onCheckedChange={(v) => setSortDir(v ? 'asc' : 'desc')}>
+              Ascending
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       <form onSubmit={handleAddTask} className="flex flex-col sm:flex-row gap-2 mb-8">
         <Input

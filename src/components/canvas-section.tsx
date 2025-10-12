@@ -3,6 +3,17 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import useLocalStorage from '@/hooks/use-local-storage';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuCheckboxItem,
+} from '@/components/ui/dropdown-menu';
+import { ChevronsUpDown } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
@@ -17,6 +28,8 @@ export default function CanvasSection() {
   const [brushColor, setBrushColor] = useState('#FFFFFF');
   const [brushSize, setBrushSize] = useState(5);
   const [drawings, setDrawings] = useLocalStorage<string[]>('drawings', []);
+  const [sortKey, setSortKey] = useLocalStorage<'date' | 'name'>('drawings-sort-key', 'date');
+  const [sortDir, setSortDir] = useLocalStorage<'asc' | 'desc'>('drawings-sort-dir', 'desc');
   const [history, setHistory] = useState<ImageData[]>([]);
   
   const getContext = useCallback(() => {
@@ -187,7 +200,27 @@ export default function CanvasSection() {
         </div>
       </div>
       <div className="lg:col-span-1 flex flex-col gap-4">
-        <h3 className="text-xl font-bold">Saved Drawings</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-bold">Saved Drawings</h3>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" title="Sort">
+                <ChevronsUpDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+              <DropdownMenuRadioGroup value={sortKey} onValueChange={(v) => setSortKey(v as any)}>
+                <DropdownMenuRadioItem value="date">Date</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="name">Name</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem checked={sortDir === 'asc'} onCheckedChange={(v) => setSortDir(v ? 'asc' : 'desc')}>
+                Ascending
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         {drawings.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground border-2 border-dashed border-border/30 rounded-lg p-8">
             <Pen className="h-12 w-12 mb-4" />
@@ -196,18 +229,29 @@ export default function CanvasSection() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 overflow-y-auto max-h-[calc(75vh-100px)] p-2 -mr-2 pr-4">
-            {drawings.map((drawing, index) => (
-              <Card key={index} className="relative group overflow-hidden bg-card/50 backdrop-blur-md border-border/30 aspect-w-1 aspect-h-1">
-                <CardContent className="p-0">
-                  <Image src={drawing} alt={`Drawing ${index + 1}`} layout="fill" objectFit="cover" className="transition-transform group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button variant="destructive" size="icon" onClick={() => deleteDrawing(index)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {(() => {
+              const sorted = [...drawings];
+              sorted.sort((a, b) => {
+                if (sortKey === 'name') {
+                  return sortDir === 'asc' ? a.localeCompare(b) : b.localeCompare(a);
+                }
+                // date by default (we saved newest first)
+                return sortDir === 'asc' ? 1 : -1;
+              });
+
+              return sorted.map((drawing, index) => (
+                <Card key={`${index}-${drawing.slice(0,12)}`} className="relative group overflow-hidden bg-card/50 backdrop-blur-md border-border/30 aspect-w-1 aspect-h-1">
+                  <CardContent className="p-0">
+                    <Image src={drawing} alt={`Drawing ${index + 1}`} layout="fill" objectFit="cover" className="transition-transform group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Button variant="destructive" size="icon" onClick={() => deleteDrawing(index)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ));
+            })()}
           </div>
         )}
       </div>
