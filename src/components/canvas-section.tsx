@@ -1,25 +1,18 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import useLocalStorage from '@/hooks/use-local-storage';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuCheckboxItem,
-} from '@/components/ui/dropdown-menu';
 import { ChevronsUpDown } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent } from '@/components/ui/card';
-import Image from 'next/image';
 import { Download, Trash2, Eraser, Pen, Undo } from 'lucide-react';
 
 const COLORS = ['#FFFFFF', '#EF4444', '#F97316', '#84CC16', '#22C55E', '#06B6D4', '#8B5CF6', '#EC4899'];
+
+interface SavedDrawing {
+  src: string;
+  createdAt: number;
+}
 
 export default function CanvasSection() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,10 +20,36 @@ export default function CanvasSection() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [brushColor, setBrushColor] = useState('#FFFFFF');
   const [brushSize, setBrushSize] = useState(5);
-  const [drawings, setDrawings] = useLocalStorage<string[]>('drawings', []);
-  const [sortKey, setSortKey] = useLocalStorage<'date' | 'name'>('drawings-sort-key', 'date');
-  const [sortDir, setSortDir] = useLocalStorage<'asc' | 'desc'>('drawings-sort-dir', 'desc');
+  const [drawings, setDrawings] = useState<SavedDrawing[]>([]);
+  const [sortKey, setSortKey] = useState<'date' | 'name'>('date');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [history, setHistory] = useState<ImageData[]>([]);
+
+  // Load drawings from localStorage on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = localStorage.getItem('nebula-drawings');
+      if (stored) {
+        const parsed = JSON.parse(stored) as SavedDrawing[];
+        setDrawings(parsed);
+        console.log('Loaded', parsed.length, 'drawings from localStorage');
+      }
+    } catch (error) {
+      console.error('Error loading drawings:', error);
+    }
+  }, []);
+
+  // Save drawings to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window === 'undefined' || drawings.length === 0) return;
+    try {
+      localStorage.setItem('nebula-drawings', JSON.stringify(drawings));
+      console.log('Saved', drawings.length, 'drawings to localStorage');
+    } catch (error) {
+      console.error('Error saving drawings to localStorage:', error);
+    }
+  }, [drawings]);
   
   const getContext = useCallback(() => {
     return canvasRef.current?.getContext('2d');
@@ -42,27 +61,11 @@ export default function CanvasSection() {
     const context = getContext();
     if (!canvas || !container || !context) return;
 
-    // Save canvas content before resizing
-    const canvasContent = context.getImageData(0, 0, canvas.width, canvas.height);
-
     const dpr = window.devicePixelRatio || 1;
     const rect = container.getBoundingClientRect();
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     context.scale(dpr, dpr);
-    
-    // Restore canvas content
-    if(canvasContent) {
-        // We need to create a temporary canvas to scale the image data
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvasContent.width;
-        tempCanvas.height = canvasContent.height;
-        const tempCtx = tempCanvas.getContext('2d');
-        if(tempCtx){
-            tempCtx.putImageData(canvasContent, 0, 0);
-            context.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
-        }
-    }
 
     context.lineCap = 'round';
     context.lineJoin = 'round';
@@ -143,14 +146,68 @@ export default function CanvasSection() {
   
   const saveDrawing = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const image = canvas.toDataURL('image/png');
-    setDrawings([image, ...drawings].slice(0, 10)); // Keep last 10
-    clearCanvas();
+    if (!canvas) {
+      console.error('Canvas ref is null');
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Failed to get 2D context');
+      return;
+    }
+
+    // Check if canvas has content
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const hasContent = imageData.data.some(byte => byte !== 0);
+    if (!hasContent) {
+      console.warn('Canvas is empty');
+      return;
+    }
+
+    try {
+      // Compress and downscale image
+      const MAX_DIM = 1200;
+      const origW = canvas.width;
+      const origH = canvas.height;
+      let targetW = origW;
+      let targetH = origH;
+
+      if (Math.max(origW, origH) > MAX_DIM) {
+        const scale = MAX_DIM / Math.max(origW, origH);
+        targetW = Math.round(origW * scale);
+        targetH = Math.round(origH * scale);
+      }
+
+      const tmp = document.createElement('canvas');
+      tmp.width = targetW;
+      tmp.height = targetH;
+      const tctx = tmp.getContext('2d');
+      if (!tctx) {
+        console.error('Failed to get temp canvas context');
+        return;
+      }
+
+      tctx.drawImage(canvas, 0, 0, targetW, targetH);
+      const src = tmp.toDataURL('image/jpeg', 0.85);
+      console.log('Image size:', src.length, 'bytes');
+
+      // Add to drawings
+      const newDrawing: SavedDrawing = {
+        src,
+        createdAt: Date.now(),
+      };
+
+      setDrawings(prev => [newDrawing, ...prev].slice(0, 10));
+      clearCanvas();
+      console.log('Drawing saved successfully');
+    } catch (error) {
+      console.error('Error saving drawing:', error);
+    }
   };
 
   const deleteDrawing = (index: number) => {
-    setDrawings(drawings.filter((_, i) => i !== index));
+    setDrawings(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -202,24 +259,6 @@ export default function CanvasSection() {
       <div className="lg:col-span-1 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-bold">Saved Drawings</h3>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" title="Sort">
-                <ChevronsUpDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-              <DropdownMenuRadioGroup value={sortKey} onValueChange={(v) => setSortKey(v as 'date' | 'name')}>
-                <DropdownMenuRadioItem value="date">Date</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="name">Name</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked={sortDir === 'asc'} onCheckedChange={(v) => setSortDir(v ? 'asc' : 'desc')}>
-                Ascending
-              </DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
         {drawings.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-muted-foreground border-2 border-dashed border-border/30 rounded-lg p-8">
@@ -229,36 +268,22 @@ export default function CanvasSection() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 overflow-y-auto max-h-[calc(75vh-100px)] p-2 -mr-2 pr-4">
-            {(() => {
-              // preserve original index so deletion works correctly after sorting
-              const items = drawings.map((src, originalIndex) => ({
-                src,
-                originalIndex,
-                name: `Drawing ${originalIndex + 1}`,
-              }));
-
-              const sorted = [...items];
-              sorted.sort((a, b) => {
-                if (sortKey === 'name') {
-                  return sortDir === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
-                }
-                // date by default: originalIndex 0 is newest (we unshift when saving)
-                return sortDir === 'asc' ? a.originalIndex - b.originalIndex : b.originalIndex - a.originalIndex;
-              });
-
-              return sorted.map((item) => (
-                <Card key={`${item.originalIndex}-${item.src.slice(0,12)}`} className="relative group overflow-hidden bg-card/50 backdrop-blur-md border-border/30 aspect-w-1 aspect-h-1">
-                  <CardContent className="p-0">
-                    <Image src={item.src} alt={`Drawing ${item.originalIndex + 1}`} layout="fill" objectFit="cover" className="transition-transform group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button variant="destructive" size="icon" onClick={() => deleteDrawing(item.originalIndex)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ));
-            })()}
+            {drawings.map((item, index) => (
+              <Card key={`drawing-${index}`} className="relative group overflow-hidden bg-card/50 backdrop-blur-md border-border/30 aspect-square">
+                <CardContent className="p-0 w-full h-full relative">
+                  <img
+                    src={item.src}
+                    alt={`Drawing ${index + 1}`}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Button variant="destructive" size="icon" onClick={() => deleteDrawing(index)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </div>
