@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronsUpDown } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent } from '@/components/ui/card';
-import { Download, Trash2, Eraser, Pen, Undo } from 'lucide-react';
+import { Download, Trash2, Eraser, Pen, Undo, X, Eye } from 'lucide-react';
 
 const COLORS = ['#FFFFFF', '#EF4444', '#F97316', '#84CC16', '#22C55E', '#06B6D4', '#8B5CF6', '#EC4899'];
 
@@ -17,6 +17,7 @@ interface SavedDrawing {
 export default function CanvasSection() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const viewerCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [brushColor, setBrushColor] = useState('#FFFFFF');
   const [brushSize, setBrushSize] = useState(5);
@@ -24,6 +25,8 @@ export default function CanvasSection() {
   const [sortKey, setSortKey] = useState<'date' | 'name'>('date');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [history, setHistory] = useState<ImageData[]>([]);
+  const [selectedDrawingIndex, setSelectedDrawingIndex] = useState<number | null>(null);
+  const [viewerMode, setViewerMode] = useState<'view' | 'edit'>('view');
 
   // Load drawings from localStorage on mount
   useEffect(() => {
@@ -208,6 +211,35 @@ export default function CanvasSection() {
 
   const deleteDrawing = (index: number) => {
     setDrawings(prev => prev.filter((_, i) => i !== index));
+    if (selectedDrawingIndex === index) {
+      setSelectedDrawingIndex(null);
+    }
+  };
+
+  const loadDrawingForEdit = (index: number) => {
+    setSelectedDrawingIndex(index);
+    setViewerMode('edit');
+  };
+
+  const loadDrawingToCanvas = useCallback(() => {
+    if (selectedDrawingIndex === null) return;
+    const drawing = drawings[selectedDrawingIndex];
+    if (!drawing || !canvasRef.current) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const ctx = canvasRef.current?.getContext('2d');
+      if (!ctx || !canvasRef.current) return;
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      ctx.drawImage(img, 0, 0);
+      setHistory([]);
+      console.log('Loaded drawing for editing');
+    };
+    img.src = drawing.src;
+  }, [selectedDrawingIndex, drawings]);
+
+  const closeViewer = () => {
+    setSelectedDrawingIndex(null);
   };
 
   return (
@@ -269,15 +301,18 @@ export default function CanvasSection() {
         ) : (
           <div className="grid grid-cols-2 gap-4 overflow-y-auto max-h-[calc(75vh-100px)] p-2 -mr-2 pr-4">
             {drawings.map((item, index) => (
-              <Card key={`drawing-${index}`} className="relative group overflow-hidden bg-card/50 backdrop-blur-md border-border/30 aspect-square">
-                <CardContent className="p-0 w-full h-full relative">
+              <Card key={`drawing-${index}`} className="relative group overflow-hidden bg-card/50 backdrop-blur-md border-border/30 aspect-square cursor-pointer">
+                <CardContent className="p-0 w-full h-full relative" onClick={() => loadDrawingForEdit(index)}>
                   <img
                     src={item.src}
                     alt={`Drawing ${index + 1}`}
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button variant="destructive" size="icon" onClick={() => deleteDrawing(index)}>
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); loadDrawingForEdit(index); }}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button variant="destructive" size="icon" onClick={(e) => { e.stopPropagation(); deleteDrawing(index); }}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -287,6 +322,83 @@ export default function CanvasSection() {
           </div>
         )}
       </div>
+
+      {/* Viewer/Editor Modal */}
+      {selectedDrawingIndex !== null && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-4">
+          <div className="bg-card/90 backdrop-blur-md border border-border/30 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border/20">
+              <h2 className="text-xl font-bold">
+                {viewerMode === 'edit' ? 'Edit Drawing' : `Drawing ${selectedDrawingIndex + 1}`}
+              </h2>
+              <Button variant="ghost" size="icon" onClick={closeViewer}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6 flex items-center justify-center min-h-0">
+              {viewerMode === 'view' ? (
+                <img
+                  src={drawings[selectedDrawingIndex]?.src}
+                  alt={`Drawing ${selectedDrawingIndex + 1}`}
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col gap-4">
+                  <canvas
+                    ref={viewerCanvasRef}
+                    className="flex-1 border border-border/30 rounded-lg bg-slate-800/50 cursor-crosshair"
+                  />
+                  <p className="text-sm text-muted-foreground">Click "Load to Canvas" to edit this drawing, or "Save as New" to keep it as is.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-border/20 p-4 flex items-center justify-end gap-2">
+              {viewerMode === 'view' ? (
+                <>
+                  <Button variant="outline" onClick={() => setViewerMode('edit')}>
+                    Edit
+                  </Button>
+                  <Button variant="outline" onClick={closeViewer}>
+                    Close
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      loadDrawingToCanvas();
+                      closeViewer();
+                    }}
+                  >
+                    Load to Canvas
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setViewerMode('view')}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      deleteDrawing(selectedDrawingIndex);
+                      closeViewer();
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
