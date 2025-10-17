@@ -169,7 +169,7 @@ export default function CanvasSection() {
     }
 
     try {
-      // Compress and downscale image
+      // Use PNG for lossless quality (no compression artifacts on edges)
       const MAX_DIM = 1200;
       const origW = canvas.width;
       const origH = canvas.height;
@@ -192,7 +192,7 @@ export default function CanvasSection() {
       }
 
       tctx.drawImage(canvas, 0, 0, targetW, targetH);
-      const src = tmp.toDataURL('image/jpeg', 0.85);
+      const src = tmp.toDataURL('image/png');
       console.log('Image size:', src.length, 'bytes');
 
       // Add to drawings
