@@ -151,20 +151,29 @@ export default function CanvasSection() {
     const canvas = canvasRef.current;
     if (!canvas) {
       console.error('Canvas ref is null');
+      alert('Error: Canvas not initialized');
       return;
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       console.error('Failed to get 2D context');
+      alert('Error: Failed to access canvas context');
       return;
     }
 
-    // Check if canvas has content
+    // Check if canvas has content (any non-transparent pixels)
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const hasContent = imageData.data.some(byte => byte !== 0);
+    const hasContent = imageData.data.some((byte, idx) => {
+      // Check alpha channel (every 4th byte)
+      if (idx % 4 === 3) return byte > 0;
+      // Check RGB channels have any color
+      return byte > 0;
+    });
+    
     if (!hasContent) {
       console.warn('Canvas is empty');
+      alert('Canvas is empty. Please draw something before saving.');
       return;
     }
 
@@ -183,29 +192,60 @@ export default function CanvasSection() {
       }
 
       const tmp = document.createElement('canvas');
-      tmp.width = targetW;
-      tmp.height = targetH;
+      tmp.width = Math.max(targetW, 1);
+      tmp.height = Math.max(targetH, 1);
       const tctx = tmp.getContext('2d');
       if (!tctx) {
         console.error('Failed to get temp canvas context');
+        alert('Error: Failed to process image');
         return;
       }
 
+      // Use higher quality rendering for temp canvas
+      tctx.imageSmoothingEnabled = true;
+      tctx.imageSmoothingQuality = 'high';
       tctx.drawImage(canvas, 0, 0, targetW, targetH);
+      
       const src = tmp.toDataURL('image/png');
-      console.log('Image size:', src.length, 'bytes');
+      
+      // Validate the data URL
+      if (!src || src.length < 100) {
+        console.error('Generated invalid data URL');
+        alert('Error: Failed to encode image. Please try again.');
+        return;
+      }
+      
+      console.log('Generated PNG, size:', src.length, 'bytes');
 
-      // Add to drawings
+      // Add to drawings with validation
       const newDrawing: SavedDrawing = {
         src,
         createdAt: Date.now(),
       };
 
-      setDrawings(prev => [newDrawing, ...prev].slice(0, 10));
+      // Attempt to save, with localStorage quota check
+      try {
+        const testKey = 'nebula-drawings-test';
+        localStorage.setItem(testKey, 'test');
+        localStorage.removeItem(testKey);
+      } catch (quotaError) {
+        console.error('localStorage quota exceeded');
+        alert('Storage limit reached. Please delete some drawings before saving more.');
+        return;
+      }
+
+      setDrawings(prev => {
+        const updated = [newDrawing, ...prev].slice(0, 10);
+        console.log('Drawings count:', updated.length);
+        return updated;
+      });
+      
       clearCanvas();
+      alert('Drawing saved successfully!');
       console.log('Drawing saved successfully');
     } catch (error) {
       console.error('Error saving drawing:', error);
+      alert(`Error saving drawing: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
